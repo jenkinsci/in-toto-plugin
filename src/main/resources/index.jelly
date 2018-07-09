@@ -1,0 +1,5 @@
+<?jelly escape-by-default='true'?>
+<div>
+    This plugin enables an in-toto BuildStep that will be used to track build
+    information and record it as in-toto metadata.
+</div>
