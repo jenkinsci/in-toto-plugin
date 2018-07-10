@@ -46,7 +46,7 @@
         </pluginRepository>
     </pluginRepositories>
   	<dependencies>
-    <!-- junit : unit test framework  -->
+    <!-- in-toto: library to generate link metadata -->
       <dependency>
         <groupId>io.in-toto</groupId>
         <artifactId>in-toto</artifactId>
