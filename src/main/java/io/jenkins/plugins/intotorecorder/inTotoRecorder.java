@@ -4,6 +4,9 @@
 package io.jenkins.plugins.intotorecorder;
 
 import io.in_toto.models.Link;
+import io.in_toto.models.Artifact.ArtifactHash;
+import io.in_toto.models.Artifact;
+
 import io.in_toto.keys.Key;
 import io.in_toto.keys.RSAKey;
 
@@ -16,6 +19,11 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
 import hudson.FilePath;
+import hudson.FilePath.FileCallable;
+import hudson.remoting.VirtualChannel;
+
+import jenkins.MasterToSlaveFileCallable;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -25,9 +33,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.InterruptedException;
 
 /**
  *
@@ -103,17 +114,19 @@ public class inTotoRecorder extends Recorder {
         this.cwd = build.getWorkspace();
         String  cwdStr = this.cwd.toString();
 
+
         listener.getLogger().println("[in-toto] Recording state before build" + cwdStr);
         listener.getLogger().println("[in-toto] using step name: " + stepName);
 
         this.link = new Link(null, null, this.stepName, null, null, null);
-
-
+        this.link.setMaterials(this.collectArtifacts(this.cwd));
         return true;
     }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+
+        this.link.setProducts(this.collectArtifacts(this.cwd));
 
         if (keyPath.length() == 0) {
             listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing..."); 
@@ -172,6 +185,16 @@ public class inTotoRecorder extends Recorder {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    private HashMap<String, ArtifactHash> collectArtifacts(FilePath path) {
+        HashMap<String, ArtifactHash> result = null;
+        try {
+            result = path.act(new ArtifactCollector());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e.toString());
+        }
+        return result;
+    }
+
     /**
      * Descriptor for {@link inTotoRecorder}. Used as a singleton. The class is
      * marked as public so that it can be accessed from views.
@@ -199,4 +222,33 @@ public class inTotoRecorder extends Recorder {
          return BuildStepMonitor.NONE;
     }
 
+    /**
+     * Class to collect artifact hashes from remote hosts.
+     *
+     */
+    private static final class ArtifactCollector
+            extends MasterToSlaveFileCallable<HashMap<String, ArtifactHash>> {
+        private static final long serialVersionUID = 1;
+
+        @Override
+        public HashMap<String, ArtifactHash> invoke(File f, VirtualChannel channel) {
+
+            HashMap<String, ArtifactHash> result = new HashMap<String, ArtifactHash>();
+            recurseAndCollect(f, result);
+            return result;
+        }
+
+        private static void recurseAndCollect(File f, HashMap<String, ArtifactHash> hashmap) {
+
+            if (f.exists() && f.isFile()) {
+                Artifact artifact = new Artifact(f.toString());
+                hashmap.put(artifact.getURI(), artifact.getArtifactHashes());
+            } else if (f.exists() && f.isDirectory()) {
+                File[] contents = f.listFiles();
+                for (int i = 0; i < contents.length; i++) {
+                    recurseAndCollect(contents[i], hashmap);
+                }
+            }
+        }
+    }
 }
