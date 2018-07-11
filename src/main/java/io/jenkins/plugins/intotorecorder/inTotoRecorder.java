@@ -45,7 +45,7 @@ import java.lang.InterruptedException;
  * Jenkins recorder plugin to output signed link metadata for Jenkins pipeline
  * steps.
  *
- * @author SantiagoTorres 
+ * @author SantiagoTorres
  */
 public class inTotoRecorder extends Recorder {
 
@@ -64,13 +64,13 @@ public class inTotoRecorder extends Recorder {
     private String stepName;
 
     /**
-     * The host URL/URI where to post the in-toto metdata. 
+     * The host URL/URI where to post the in-toto metdata.
      *
      * Protocol information *must* be included.
      */
     private String transport;
 
-    /** 
+    /**
      * Link metadata used to record this step
      *
      */
@@ -81,7 +81,7 @@ public class inTotoRecorder extends Recorder {
      */
     private Key key;
 
-    /** 
+    /**
      * The current working directory (to be recorded as context).
      *
      */
@@ -129,16 +129,16 @@ public class inTotoRecorder extends Recorder {
         this.link.setProducts(this.collectArtifacts(this.cwd));
 
         if (keyPath.length() == 0) {
-            listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing..."); 
+            listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing...");
         } else {
-            listener.getLogger().println("[in-toto] Signing with keyid: " + this.key.computeKeyId()); 
+            listener.getLogger().println("[in-toto] Signing with keyid: " + this.key.computeKeyId());
             signLink();
-        } 
+        }
         if (transport == null || transport.length() == 0) {
             listener.getLogger().println("[in-toto] No transport specified (or transport not supported)"
-                    + " Dumping metadata to local directory"); 
+                    + " Dumping metadata to local directory");
         } else {
-            listener.getLogger().println("[in-toto] Dumping metadata to: " + transport); 
+            listener.getLogger().println("[in-toto] Dumping metadata to: " + transport);
         }
         dumpLink();
 
@@ -147,13 +147,13 @@ public class inTotoRecorder extends Recorder {
 
     /* Private method that will help me publish metadata in a transport agnostic way. Most likely
      * by buffering and sending stuff over the wire once it's serialized to teporary directory
-     */    
+     */
     private void dumpLink() {
         String linkName = stepName + ".xxxx.link";
         this.link.dump(linkName);
     }
 
-    private void signLink() { 
+    private void signLink() {
         this.link.sign(this.key);
     }
 
@@ -164,7 +164,7 @@ public class inTotoRecorder extends Recorder {
             throw new RuntimeException("this Signing keypath ("
                     + keyPath + ")does not exist!");
         }
-        
+
         this.key = RSAKey.read(keyPath);
     }
 
@@ -176,7 +176,7 @@ public class inTotoRecorder extends Recorder {
         return this.stepName;
     }
 
-    public String getTransport() { 
+    public String getTransport() {
         return this.transport;
     }
 
@@ -198,7 +198,7 @@ public class inTotoRecorder extends Recorder {
     /**
      * Descriptor for {@link inTotoRecorder}. Used as a singleton. The class is
      * marked as public so that it can be accessed from views.
-     * 
+     *
      *
      * See
      * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
