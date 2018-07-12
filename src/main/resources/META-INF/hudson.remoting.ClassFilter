@@ -1,0 +1,9 @@
+io.in_toto.keys.RSAKey
+org.bouncycastle.openssl.PEMKeyPair
+org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+org.bouncycastle.asn1.x509.AlgorithmIdentifier
+org.bouncycastle.asn1.ASN1ObjectIdentifier
+org.bouncycastle.asn1.DERNull
+org.bouncycastle.asn1.DERBitString
+org.bouncycastle.asn1.pkcs.PrivateKeyInfo
+org.bouncycastle.asn1.DEROctetString
