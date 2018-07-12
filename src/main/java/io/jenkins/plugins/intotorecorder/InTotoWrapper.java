@@ -286,7 +286,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
          * by buffering and sending stuff over the wire once it's serialized to teporary directory
          */
         private void dumpLink(FilePath cwd) {
-            String linkName = cwd.child(stepName + ".xxxx.link").toString();
+            String linkName = cwd.child(this.stepName + ".xxxx.link").toString();
             this.link.dump(linkName);
         }
 

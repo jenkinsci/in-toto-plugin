@@ -149,7 +149,7 @@ public class inTotoRecorder extends Recorder {
      * by buffering and sending stuff over the wire once it's serialized to teporary directory
      */
     private void dumpLink() {
-        String linkName = stepName + ".xxxx.link";
+        String linkName = this.cwd.toString() + "/" + stepName + ".xxxx.link";
         this.link.dump(linkName);
     }
 
