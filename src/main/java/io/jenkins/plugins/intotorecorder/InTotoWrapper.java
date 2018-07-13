@@ -135,7 +135,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         listener.getLogger().println("[in-toto] using step name: " + stepName);
 
         this.link = new Link(null, null, this.stepName, null, null, null);
-        this.link.setMaterials(this.collectArtifacts(this.cwd));
+        this.link.setMaterials(InTotoWrapper.collectArtifacts(this.cwd));
 
         context.setDisposer(new PostWrap(this.link, this.key));
     }
@@ -168,7 +168,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.stepName = stepName;
     }
 
-    private HashMap<String, ArtifactHash> collectArtifacts(FilePath path) {
+    public static HashMap<String, ArtifactHash> collectArtifacts(FilePath path) {
         HashMap<String, ArtifactHash> result = null;
         try {
             result = path.act(new ArtifactCollector());
@@ -265,7 +265,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                                throws IOException,
                                       InterruptedException {
 
-            //this.link.setProducts(this.collectArtifacts(cwd));
+            this.link.setProducts(InTotoWrapper.collectArtifacts(workspace));
 
             if (this.key == null) {
                 listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing...");
