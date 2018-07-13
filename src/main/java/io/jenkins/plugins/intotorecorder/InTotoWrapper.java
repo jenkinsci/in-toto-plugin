@@ -137,7 +137,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.link = new Link(null, null, this.stepName, null, null, null);
         this.link.setMaterials(InTotoWrapper.collectArtifacts(this.cwd));
 
-        context.setDisposer(new PostWrap(this.link, this.key));
+        context.setDisposer(new PostWrap(this.link, this.key, this.stepName));
     }
 
     private void loadKey(String keyPath) {
@@ -242,18 +242,20 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         }
     }
 
-    public class PostWrap extends Disposer {
+    public static class PostWrap extends Disposer {
 
         private static final long serialVersionUID = 2;
-        Link link;
-        Key key;
+        transient Link link;
+        transient Key key;
         String transport;
+        String stepName;
 
-        public PostWrap(Link link, Key key) {
+        public PostWrap(Link link, Key key, String stepName) {
             super();
 
             this.link = link;
             this.key = key;
+            this.stepName = stepName;
             this.transport = null;
         }
 
