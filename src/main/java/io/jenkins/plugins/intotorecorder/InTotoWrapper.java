@@ -66,6 +66,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      *
      * If not defined signing will not be performed.
      */
+    @DataBoundSetter
     private String keyPath;
 
     /**
@@ -73,6 +74,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      *
      * If not defined, will default to step
      */
+    @DataBoundSetter
     private String stepName;
 
     /**
@@ -80,6 +82,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      *
      * Protocol information *must* be included.
      */
+    @DataBoundSetter
     private String transport;
 
     /**
@@ -163,10 +166,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         return this.transport;
     }
 
-    @DataBoundSetter
-    public void setStepName(String stepName) {
-        this.stepName = stepName;
-    }
 
     public static HashMap<String, ArtifactHash> collectArtifacts(FilePath path) {
         HashMap<String, ArtifactHash> result = null;
@@ -187,8 +186,8 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
      * for the actual HTML fragment for the configuration screen.
      */
-	@Symbol("in-toto")
     @Extension
+    @Symbol("in_toto_wrap")
     public static final class DescriptorImpl extends BuildWrapperDescriptor {
 
         public DescriptorImpl() {
@@ -204,10 +203,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
             return true;
-        }
-
-        public String getCommandline() {
-            return "wat";
         }
 
     }
