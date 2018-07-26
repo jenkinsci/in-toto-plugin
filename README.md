@@ -29,7 +29,7 @@ information of the build process.
 
 As of now, the current limitations exist:
 
-- As of now, the provenance module treats all the pipeline as a single step.
+- The provenance module treats all the pipeline as a single step.
 - There hasn't been much thorough testing with the pipeline plugin. Although it
   *should* work, there may be some rough edges to fix up.
 - There should be other interesting settings to add (e.g., ignore patterns,
