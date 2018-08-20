@@ -66,6 +66,79 @@
           </compilerArgs>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <environmentVariables>
+            <ETCD_SERVER_PORT>${etcd-server.port}</ETCD_SERVER_PORT>
+            <REDIS_SERVER_PORT>${redis.port}</REDIS_SERVER_PORT>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.20.1</version>
+        <executions>
+          <execution>
+            <id>prepare-etcd-server</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <images>
+                <image>
+                  <name>elcolio/etcd</name>
+                  <alias>etcd-server</alias>
+                  <run>
+                    <ports>
+                      <port>etcd-server.port:2379</port>
+                    </ports>
+                    <wait>
+                      <http>
+                        <url>http://localhost:${etcd-server.port}/v2/keys</url>
+                        <method>GET</method>
+                        <status>200..399</status>
+                      </http>
+                      <time>20000</time>
+                    </wait>
+                  </run>
+                </image>
+                <image>
+                  <name>redis</name>
+                  <alias>redis-server</alias>
+                  <run>
+                    <ports>
+                      <port>redis.port:6379</port>
+                    </ports>
+                    <wait>
+                      <log>\* Ready to accept connections</log>
+                      <time>20000</time>
+                    </wait>
+                  </run>
+                </image>
+              </images>
+            </configuration>
+          </execution>
+          <execution>
+            <id>remove-etcd-server</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
