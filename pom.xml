@@ -53,6 +53,27 @@
         <version>0.1</version>
         <scope>compile</scope>
       </dependency>
+      <dependency>
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client</artifactId>
+        <version>1.23.0</version>
+      </dependency>
+      <!--
+        FIXME: this apparently requires a version of Guava that conflicts w
+        ith the one installed as a plugin base.
+      <dependency>
+        <groupId>com.coreos</groupId>
+        <artifactId>jetcd-core</artifactId>
+        <version>0.0.2</version>
+      </dependency>
+      -->
+      <dependency>
+          <groupId>redis.clients</groupId>
+          <artifactId>jedis</artifactId>
+          <version>2.9.0</version>
+          <type>jar</type>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
   <build>
     <plugins>
