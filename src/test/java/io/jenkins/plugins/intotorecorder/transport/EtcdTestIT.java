@@ -30,8 +30,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.HttpResponse;
 
-import io.in_toto.models.Link;
-import io.in_toto.keys.RSAKey;
+import io.github.in_toto.models.Link;
+import io.github.in_toto.keys.RSAKey;
 
 import java.net.URI;
 import java.lang.System;
