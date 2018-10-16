@@ -3,12 +3,12 @@
  */
 package io.jenkins.plugins.intotorecorder;
 
-import io.in_toto.models.Link;
-import io.in_toto.models.Artifact.ArtifactHash;
-import io.in_toto.models.Artifact;
+import io.github.in_toto.models.Link;
+import io.github.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.models.Artifact;
 
-import io.in_toto.keys.Key;
-import io.in_toto.keys.RSAKey;
+import io.github.in_toto.keys.Key;
+import io.github.in_toto.keys.RSAKey;
 
 import hudson.Extension;
 import hudson.Launcher;
