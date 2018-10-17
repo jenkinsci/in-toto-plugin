@@ -21,29 +21,14 @@ import hudson.util.RunList;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.remoting.VirtualChannel;
-import hudson.util.ListBoxModel;
-import hudson.util.FormValidation;
-import hudson.security.ACL;
 
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.model.Jenkins;
-
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-
-import org.apache.commons.lang.StringUtils;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.Reader;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,10 +38,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Collections;
 import java.lang.InterruptedException;
-
-import org.jenkinsci.plugins.plaincredentials.FileCredentials;
 
 /**
  *
@@ -73,13 +55,6 @@ public class inTotoRecorder extends Recorder {
      * If not defined signing will not be performed.
      */
     private String keyPath;
-
-    /**
-     * CredentialsId for the key to load.
-     *
-     * If not defined signing will not be performed.
-     */
-    private String credentialId;
 
     /**
      * Name of the step to execute.
@@ -113,7 +88,7 @@ public class inTotoRecorder extends Recorder {
     private FilePath cwd;
 
     @DataBoundConstructor
-    public inTotoRecorder(String credentialId, String keyPath, String stepName, String transport)
+    public inTotoRecorder(String keyPath, String stepName, String transport)
     {
 
         /* Set a "sensible" step name if not defined */
@@ -123,19 +98,9 @@ public class inTotoRecorder extends Recorder {
 
         /* notice how we can't do the same for the key, as that'd be a security
          * hazard */
-
-        this.credentialId = credentialId;
         this.keyPath = keyPath;
-
-        if (credentialId != null && credentialId.length() != 0 ) {
-            try {
-                loadKey(new InputStreamReader(getCredentials().getContent()));
-            } catch (IOException e) {
-                throw new RuntimeException("credentialId '" + credentialId + "' can't be read. ");
-            }
-        } else if (keyPath != null && keyPath.length() != 0) {
+        if (keyPath  != null && keyPath.length() != 0)
             loadKey(keyPath);
-        }
 
         /* The transport property will default to the current CWD, but we can't figure that one
          * just yet
@@ -149,7 +114,8 @@ public class inTotoRecorder extends Recorder {
         this.cwd = build.getWorkspace();
         String  cwdStr = this.cwd.toString();
 
-        listener.getLogger().println("[in-toto] Recording state before build " + cwdStr);
+
+        listener.getLogger().println("[in-toto] Recording state before build" + cwdStr);
         listener.getLogger().println("[in-toto] using step name: " + stepName);
 
         this.link = new Link(null, null, this.stepName, null, null, null);
@@ -162,13 +128,10 @@ public class inTotoRecorder extends Recorder {
 
         this.link.setProducts(this.collectArtifacts(this.cwd));
 
-        if ( this.key == null &&
-            (this.keyPath  == null || this.keyPath.length() == 0) )
-        {
-            listener.getLogger().println("[in-toto] Warning! no key specified. Not signing...");
+        if (keyPath.length() == 0) {
+            listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing...");
         } else {
-            listener.getLogger().println("[in-toto] Signing with key "
-                    + this.credentialId + " " + this.keyPath + " and keyid: " + this.key.computeKeyId());
+            listener.getLogger().println("[in-toto] Signing with keyid: " + this.key.computeKeyId());
             signLink();
         }
         if (transport == null || transport.length() == 0) {
@@ -194,10 +157,6 @@ public class inTotoRecorder extends Recorder {
         this.link.sign(this.key);
     }
 
-    private void loadKey(Reader reader) {
-        this.key = RSAKey.readPemBuffer(reader);
-    }
-
     private void loadKey(String keyPath) {
         File keyFile = new File(keyPath);
 
@@ -207,10 +166,6 @@ public class inTotoRecorder extends Recorder {
         }
 
         this.key = RSAKey.read(keyPath);
-    }
-
-    public String getCredentialId() {
-        return this.credentialId;
     }
 
     public String getKeyPath() {
@@ -224,24 +179,6 @@ public class inTotoRecorder extends Recorder {
     public String getTransport() {
         return this.transport;
     }
-
-    protected final FileCredentials getCredentials() throws IOException {
-        FileCredentials fileCredential = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
-                    FileCredentials.class,
-                    Jenkins.getInstance(),
-                    ACL.SYSTEM,
-                    Collections.<DomainRequirement>emptyList()
-            ),
-            CredentialsMatchers.withId(credentialId)
-            );
-
-        if ( fileCredential == null )
-            throw new RuntimeException(" Could not find credentials entry with ID '" + credentialId + "' ");
-
-        return fileCredential;
-    }
-
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -279,49 +216,6 @@ public class inTotoRecorder extends Recorder {
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {return "in-toto provenance plugin";}
-
-        /**
-         * populating the credentialId drop-down list
-         */
-        public ListBoxModel doFillCredentialIdItems(@AncestorInPath Item item, @QueryParameter String credentialId) {
-
-            StandardListBoxModel result = new StandardListBoxModel();
-            if (item == null) {
-                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
-                    return result.includeCurrentValue(credentialId);
-                }
-            } else {
-                if (!item.hasPermission(Item.EXTENDED_READ)
-                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
-                    return result.includeCurrentValue(credentialId);
-                }
-            }
-            return result
-                    .includeEmptyValue()
-                    .includeAs(ACL.SYSTEM,
-                    Jenkins.getInstance(),
-                    FileCredentials.class)
-                    .includeCurrentValue(credentialId);
-        }
-
-        /**
-         * validating the credentialId
-         */
-        public FormValidation doCheckCredentialId(@AncestorInPath Item item, @QueryParameter String value) {
-            if (item == null) {
-                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
-                    return FormValidation.ok();
-                }
-            } else {
-                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
-                    return FormValidation.ok();
-                }
-            }
-            if (StringUtils.isBlank(value)) {
-                return FormValidation.ok();
-            }
-            return FormValidation.ok();
-        }
     }
 
     public BuildStepMonitor getRequiredMonitorService() {

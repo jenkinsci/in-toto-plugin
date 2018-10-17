@@ -20,13 +20,10 @@ implementation is reached.
 This plugin exposes a "post build" entry in the task menu. When selecting it
 you will be prompted to fill the following information in:
 
-- stepName: the name of the step for this Jenkins pipeline (more on that later)
-- credentialId: Id of File Credential as the signing key used to sign the link metada. *
-- keyPath: the path to the signing key used to sign the link metadata. *
+- step name: the name of the step for this Jenkins pipeline (more on that later)
+- key path: the path to the signing key used to sign the link metadata.
 - transport: a URI to where to post the metadata upon
   completion.
-
-* You should either fill the credentialId or keyPath to assgin a key for signing the link metadata.
 
 Once this is done, the plugin will take care of generating and tracking
 information of the build process.
@@ -44,11 +41,11 @@ pipeline {
 
   stages {
     stage('Build') {
-      agent { label 'worker01' }
+      agent { label 'worker 1' }
 
       steps {
         in_toto_wrap(['stepName': 'Build',
-            'credentialId': 'keyId01',
+            'keyPath': '/worker-key1',
             'transport': 'redis://redis']){
           echo 'Building..'
         }
@@ -62,9 +59,9 @@ This will produce a piece of link metadata and post it to a redis server.
 Currently, we have transport handlers for redis, etcd and an unauthenticated
 POST request with the link metadata.
 
-If using the keypath parameter, the path must be located on the remote worker. The plugin uses a
+The keypath must be located on the remote worker. The plugin uses a
 `MasterToSlave` handler to serialize in-toto code to capture the in-toto
-metadata natively in any worker. This both serves to not expose the slave's key
+metadata natively in any worker. This both serves to not expose the key
 unecessarilly in the Master's filesystem and to authenticate any worker that
 performed the pipeline step.
 
@@ -85,7 +82,6 @@ As of now, the current limitations exist:
 
 - There hasn't been much thorough testing with the pipeline plugin. Although it
   *should* work, there may be some rough edges to fix up.
-- If using the credentialId, the metadata will be signed in master.
 - There should be other interesting settings to add (e.g., ignore patterns,
   etc.). Right now, and due to the way the workspaces are created in Jenknis,
   the whole of the .git folder is tracked upon execution (which increases the
