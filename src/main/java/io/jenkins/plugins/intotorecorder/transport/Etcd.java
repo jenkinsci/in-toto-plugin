@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import java.net.URI;
 
-import io.in_toto.models.Link;
+import io.github.in_toto.models.Link;
 
 // import com.coreos.jetcd.Client;
 // import com.coreos.jetcd.data.ByteSequence;

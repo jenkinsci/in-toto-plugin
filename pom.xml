@@ -1,79 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>3.4</version>
-        <relativePath />
-    </parent>
-    <groupId>io.jenkins.plugins</groupId>
-    <artifactId>in-toto</artifactId>
-    <version>0.1</version>
-    <packaging>hpi</packaging>
-    <properties>
-        <jenkins.version>2.7.3</jenkins.version>
-        <java.level>8</java.level>
-    </properties>
-    <name>in-toto provenance agent</name>
-        <description>
-            This agent automatically tracks steps in a Jenkins pipeline and produces link metadata that corresponds to it.
-        </description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
-    <!-- Assuming you want to host on @jenkinsci:
-    <url>https://wiki.jenkins.io/display/JENKINS/TODO+Plugin</url>
-    <scm>
-        <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    </scm>
-    -->
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-  	<dependencies>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>3.4</version>
+    <relativePath />
+  </parent>
+  <groupId>io.jenkins.plugins</groupId>
+  <artifactId>in-toto</artifactId>
+  <version>0.1</version>
+  <packaging>hpi</packaging>
+  <properties>
+    <jenkins.version>2.7.3</jenkins.version>
+    <java.level>8</java.level>
+  </properties>
+  <name>in-toto provenance agent</name>
+    <description>
+      This agent automatically tracks steps in a Jenkins pipeline and produces link metadata that corresponds to it.
+    </description>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+        <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+  <!-- Assuming you want to host on @jenkinsci:
+  <url>https://wiki.jenkins.io/display/JENKINS/TODO+Plugin</url>
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+  </scm>
+  -->
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+      </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <dependencies>
     <!-- in-toto: library to generate link metadata -->
-      <dependency>
-        <groupId>io.in-toto</groupId>
-        <artifactId>in-toto</artifactId>
-        <version>0.1</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.http-client</groupId>
-        <artifactId>google-http-client</artifactId>
-        <version>1.23.0</version>
-      </dependency>
-      <!--
-        FIXME: this apparently requires a version of Guava that conflicts w
-        ith the one installed as a plugin base.
-      <dependency>
-        <groupId>com.coreos</groupId>
-        <artifactId>jetcd-core</artifactId>
-        <version>0.0.2</version>
-      </dependency>
-      -->
-      <dependency>
-          <groupId>redis.clients</groupId>
-          <artifactId>jedis</artifactId>
-          <version>2.9.0</version>
-          <type>jar</type>
-          <scope>compile</scope>
-      </dependency>
+    <dependency>
+      <groupId>io.github.in-toto</groupId>
+      <artifactId>in-toto</artifactId>
+      <version>0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <version>1.23.0</version>
+    </dependency>
+    <!--
+      FIXME: this apparently requires a version of Guava that conflicts w
+      ith the one installed as a plugin base.
+    <dependency>
+      <groupId>com.coreos</groupId>
+      <artifactId>jetcd-core</artifactId>
+      <version>0.0.2</version>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>2.9.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+    <!-- credentials plugin -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials</artifactId>
+      <version>2.1.17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>plain-credentials</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -87,28 +98,28 @@
           </compilerArgs>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <environmentVariables>
-            <ETCD_SERVER_PORT>${etcd-server.port}</ETCD_SERVER_PORT>
-            <REDIS_SERVER_PORT>${redis.port}</REDIS_SERVER_PORT>
-          </environmentVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.20.1</version>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-failsafe-plugin</artifactId>
+      <executions>
+        <execution>
+          <goals>
+            <goal>integration-test</goal>
+            <goal>verify</goal>
+          </goals>
+        </execution>
+      </executions>
+      <configuration>
+        <environmentVariables>
+          <ETCD_SERVER_PORT>${etcd-server.port}</ETCD_SERVER_PORT>
+          <REDIS_SERVER_PORT>${redis.port}</REDIS_SERVER_PORT>
+        </environmentVariables>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>io.fabric8</groupId>
+      <artifactId>docker-maven-plugin</artifactId>
+      <version>0.20.1</version>
         <executions>
           <execution>
             <id>prepare-etcd-server</id>

@@ -5,7 +5,7 @@ package io.jenkins.plugins.intotorecorder.transport;
 
 import java.net.URI;
 
-import io.in_toto.models.Link;
+import io.github.in_toto.models.Link;
 
 public abstract class Transport {
 

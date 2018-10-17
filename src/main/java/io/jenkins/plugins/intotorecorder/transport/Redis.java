@@ -4,7 +4,7 @@
 package io.jenkins.plugins.intotorecorder.transport;
 
 import redis.clients.jedis.Jedis;
-import io.in_toto.models.Link;
+import io.github.in_toto.models.Link;
 import java.net.URI;
 
 public class Redis extends Transport {
