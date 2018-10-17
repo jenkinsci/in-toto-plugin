@@ -48,9 +48,9 @@
   	<dependencies>
     <!-- in-toto: library to generate link metadata -->
       <dependency>
-        <groupId>io.in-toto</groupId>
+        <groupId>io.github.in-toto</groupId>
         <artifactId>in-toto</artifactId>
-        <version>0.1</version>
+        <version>0.1.1</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

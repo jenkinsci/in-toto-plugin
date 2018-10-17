@@ -5,12 +5,12 @@ package io.jenkins.plugins.intotorecorder;
 
 import io.jenkins.plugins.intotorecorder.transport.Transport;
 
-import io.in_toto.models.Link;
-import io.in_toto.models.Artifact.ArtifactHash;
-import io.in_toto.models.Artifact;
+import io.github.in_toto.models.Link;
+import io.github.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.models.Artifact;
 
-import io.in_toto.keys.Key;
-import io.in_toto.keys.RSAKey;
+import io.github.in_toto.keys.Key;
+import io.github.in_toto.keys.RSAKey;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
