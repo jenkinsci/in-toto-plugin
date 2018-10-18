@@ -28,8 +28,14 @@ import hudson.FilePath;
 import hudson.EnvVars;
 import hudson.FilePath.FileCallable;
 import hudson.remoting.VirtualChannel;
+import hudson.security.ACL;
 
 import jenkins.MasterToSlaveFileCallable;
+import jenkins.model.Jenkins;
+
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -37,19 +43,16 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import org.jenkinsci.Symbol;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.Reader;
+import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collections;
 import java.lang.InterruptedException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,7 +61,7 @@ import jenkins.tasks.SimpleBuildWrapper;
 import jenkins.tasks.SimpleBuildWrapper.Context;
 import jenkins.tasks.SimpleBuildWrapper.Disposer;
 
-
+import org.jenkinsci.plugins.plaincredentials.FileCredentials;
 
 /**
  *
@@ -76,6 +79,14 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      */
     @DataBoundSetter
     private String keyPath;
+
+    /**
+     * CredentialId for the key to load.
+     *
+     * If not defined signing will not be performed.
+     */
+    @DataBoundSetter
+    private String credentialId;
 
     /**
      * Name of the step to execute.
@@ -111,13 +122,24 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     private FilePath cwd;
 
     @DataBoundConstructor
-    public InTotoWrapper(String keyPath, String stepName, String transport)
+    public InTotoWrapper(String credentialId, String keyPath, String stepName, String transport)
     {
 
         /* Set a "sensible" step name if not defined */
         if (stepName == null || stepName.length() == 0)
             stepName = "step";
         this.stepName = stepName;
+
+        this.credentialId = credentialId;
+        if(credentialId != null && credentialId.length() != 0) {
+            try {
+                loadKey(new InputStreamReader(getCredentials().getContent()));
+            } catch (IOException e) {
+                throw new RuntimeException("credential with Id '" + credentialId + "' can't be read. ");
+            }
+        }
+
+        this.keyPath = keyPath;
 
         /* notice how we can't do the same for the key, as that'd be a security
          * hazard
@@ -150,16 +172,28 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.cwd = workspace;
 
         listener.getLogger().println("[in-toto] wrapping step ");
-        listener.getLogger().println("[in-toto] using step name: " + this.transport);
+        listener.getLogger().println("[in-toto] using step name: " + this.stepName);
+        listener.getLogger().println("[in-toto] transport: " + this.transport);
+        if ( credentialId != null && credentialId.length() != 0 && this.key != null ) {
+                listener.getLogger().println("[in-toto] Key fetched from credentialId " + this.credentialId);
+            } else if (keyPath != null && keyPath.length() != 0) {
+                listener.getLogger().println("[in-toto] CredentialId not found, but the keyPath is " + this.keyPath);
+            } else {
+                throw new RuntimeException("[in-toto] Neither credentialId nor keyPath found for signing key! ");
+        }
 
         this.link = new Link(null, null, this.stepName, null, null, null);
         this.link.setMaterials(InTotoWrapper.collectArtifacts(this.cwd));
 
-        listener.getLogger().println("[in-toto] Dumping metadata..." + this.keyPath);
-        context.setDisposer(new PostWrap(this.link, this.keyPath, this.stepName,
+        listener.getLogger().println("[in-toto] Dumping metadata... ");
+
+        context.setDisposer(new PostWrap(this.link, this.key, this.keyPath, this.stepName,
                     this.transport));
     }
 
+    private void loadKey(Reader reader) {
+        this.key = RSAKey.readPemBuffer(reader);
+    }
 
     public String getKeyPath() {
         return this.keyPath;
@@ -173,6 +207,22 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         return this.transport;
     }
 
+    protected final FileCredentials getCredentials() throws IOException {
+        FileCredentials fileCredential = CredentialsMatchers.firstOrNull(
+            CredentialsProvider.lookupCredentials(
+                    FileCredentials.class,
+                    Jenkins.getInstance(),
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement>emptyList()
+            ),
+            CredentialsMatchers.withId(this.credentialId)
+            );
+
+        if ( fileCredential == null )
+            throw new RuntimeException(" Could not find credentials entry with ID '" + credentialId + "' ");
+
+        return fileCredential;
+    }
 
     public static HashMap<String, ArtifactHash> collectArtifacts(FilePath path) {
         HashMap<String, ArtifactHash> result = null;
@@ -267,6 +317,8 @@ public class InTotoWrapper extends SimpleBuildWrapper {
             this.transportURL = transportURL;
         }
 
+
+
         @Override
         public String invoke(File f, VirtualChannel channel) {
 
@@ -290,7 +342,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
             File keyFile = new File(keyPath);
 
             if (!keyFile.exists()) {
-                throw new RuntimeException("this Signing keypath ("
+                throw new RuntimeException(" This signing keypath ("
                         + keyPath + ") does not exist!");
             }
 
@@ -303,15 +355,17 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
         private static final long serialVersionUID = 2;
         transient Link link;
+        transient Key key;
         transient String keyPath;
         String transportURL;
         String stepName;
 
-        public PostWrap(Link link, String keyPath, String stepName,
+        public PostWrap(Link link, Key key, String keyPath, String stepName,
                 String transportURL) {
             super();
 
             this.link = link;
+            this.key = key;
             this.keyPath = keyPath;
             this.stepName = stepName;
 
@@ -338,12 +392,18 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                 transport = Transport.TransportFactory.transportForURI(new URI(transportURL));
             } catch (URISyntaxException | RuntimeException e) {}
 
-            this.link = Link.read(dumpLink(workspace));
+            if (this.key != null) {
+                this.link.sign(key);
+            } else if (this.keyPath != null) {
+                this.link = Link.read(dumpLink(workspace));
+            } else {
+                listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing...");
+            }
 
             if (transportURL.length() == 0 || transport == null) {
                 listener.getLogger().println("[in-toto] No transport specified " +
                         "(or transport not supported)" +
-                        " Dumping metadata to worker's directory");
+                        " Dumping metadata to local directory");
             } else {
                 listener.getLogger().println("[in-toto] Dumping metadata to: " + transport);
                 transport.submit(this.link);
@@ -352,7 +412,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
         /* Private method that will help me publish metadata in a transport
          * agnostic way. Most likely by buffering and sending stuff over the
-         * wire once it's serialized to teporary directory
+         * wire once it's serialized to temporary directory
          */
         private String dumpLink(FilePath cwd) {
 
@@ -362,7 +422,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                             this.transportURL));
             } catch(IOException | InterruptedException e) {
                 throw new RuntimeException(
-                        "Can't create child node for link metadata" +
+                        "Can't create child node for link metadata " +
                         e.toString());
             }
         }
