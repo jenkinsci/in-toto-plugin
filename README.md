@@ -44,7 +44,7 @@ pipeline {
 
   stages {
     stage('Build') {
-      agent { label 'worker01' }
+      agent { label 'worker 1' }
 
       steps {
         in_toto_wrap(['stepName': 'Build',
