@@ -9,17 +9,17 @@ import java.net.URI;
 
 public class Redis extends Transport {
 
-    private final int REDIS_DEFAULT_PORT = 6379;
+    private final static int REDIS_DEFAULT_PORT = 6379;
     URI uri;
     Jedis jedis;
 
     public Redis(URI uri) {
         this.uri = uri;
-        int port = uri.getPort();
-        if (uri.getPort() == - 1)
+        int port = this.uri.getPort();
+        if (this.uri.getPort() == - 1)
             port = REDIS_DEFAULT_PORT;
 
-        this.jedis = new Jedis(uri.getHost(), port);
+        this.jedis = new Jedis(this.uri.getHost(), port);
     }
 
     public void submit(Link link) {
