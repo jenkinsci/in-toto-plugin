@@ -110,7 +110,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      */
     private Link link;
 
-
     /**
      * Loaded key used to sign metadata
      */
