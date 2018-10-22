@@ -8,9 +8,12 @@ As of now, this is still WIP, although the core features are implemented.
 
 ## Installation
 
-You can compile the plugin by running `mvn package` (note, make sure
-you have the [in-toto-java jar available](https://github.com/controlplaneio/in-toto-java).
-and manually install the `.hpi` file in your Jenkins installation.
+ou can compile the plugin by running `mvn package`, and then
+manually install the `.hpi` file in your Jenkins installation.
+
+A Makefile is provided to build the plugin. `make build` will simply run `mvn
+package` (needs JDK 8), whereas `make docker-build` will do the same inside a
+container, meaning you don't have to worry about having the JDK installed.
 
 We intend to move this to the plugin site for Jenkins once a more mature
 implementation is reached.
