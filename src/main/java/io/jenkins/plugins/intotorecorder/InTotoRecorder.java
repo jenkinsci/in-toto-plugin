@@ -65,7 +65,7 @@ import org.jenkinsci.plugins.plaincredentials.FileCredentials;
  *
  * @author SantiagoTorres
  */
-public class inTotoRecorder extends Recorder {
+public class InTotoRecorder extends Recorder {
 
     /**
      * Location of the key to load.
@@ -113,7 +113,7 @@ public class inTotoRecorder extends Recorder {
     private FilePath cwd;
 
     @DataBoundConstructor
-    public inTotoRecorder(String credentialId, String keyPath, String stepName, String transport)
+    public InTotoRecorder(String credentialId, String keyPath, String stepName, String transport)
     {
 
         /* Set a "sensible" step name if not defined */
@@ -129,7 +129,7 @@ public class inTotoRecorder extends Recorder {
 
         if (credentialId != null && credentialId.length() != 0 ) {
             try {
-                loadKey(new InputStreamReader(getCredentials().getContent()));
+                loadKey(new InputStreamReader(getCredentials().getContent(), "UTF-8"));
             } catch (IOException e) {
                 throw new RuntimeException("credentialId '" + credentialId + "' can't be read. ");
             }
@@ -147,7 +147,12 @@ public class inTotoRecorder extends Recorder {
     public boolean prebuild(AbstractBuild<?,?> build, BuildListener listener)  {
 
         this.cwd = build.getWorkspace();
-        String  cwdStr = this.cwd.toString();
+        String  cwdStr;
+        if (this.cwd != null) {
+            cwdStr = this.cwd.toString();
+        } else {
+            throw new RuntimeException("[in-toto] Cannot get the build workspace");
+        }
 
         listener.getLogger().println("[in-toto] Recording state before build " + cwdStr);
         listener.getLogger().println("[in-toto] using step name: " + stepName);
@@ -162,15 +167,18 @@ public class inTotoRecorder extends Recorder {
 
         this.link.setProducts(this.collectArtifacts(this.cwd));
 
-        if ( this.key == null &&
-            (this.keyPath  == null || this.keyPath.length() == 0) )
-        {
-            listener.getLogger().println("[in-toto] Warning! no key specified. Not signing...");
-        } else {
-            listener.getLogger().println("[in-toto] Signing with key "
-                    + this.credentialId + " " + this.keyPath + " and keyid: " + this.key.computeKeyId());
+        if ( this.credentialId != null && this.credentialId.length() != 0 ) {
+            listener.getLogger().println("[in-toto] Signing with credentials '"
+                    + this.credentialId + "' " + " and keyid: " + this.key.computeKeyId());
             signLink();
+        } else if ( this.keyPath != null && this.keyPath.length() != 0 ) {
+            listener.getLogger().println("[in-toto] Signing with keyPath '"
+                    + this.keyPath + "' " + " and keyid: " + this.key.computeKeyId());
+            signLink();
+        } else {
+            listener.getLogger().println("[in-toto] Warning! no key specified. Not signing...");
         }
+
         if (transport == null || transport.length() == 0) {
             listener.getLogger().println("[in-toto] No transport specified (or transport not supported)"
                     + " Dumping metadata to local directory");
@@ -259,7 +267,7 @@ public class inTotoRecorder extends Recorder {
     }
 
     /**
-     * Descriptor for {@link inTotoRecorder}. Used as a singleton. The class is
+     * Descriptor for {@link InTotoRecorder}. Used as a singleton. The class is
      * marked as public so that it can be accessed from views.
      *
      *
@@ -351,8 +359,10 @@ public class inTotoRecorder extends Recorder {
                 hashmap.put(artifact.getURI(), artifact.getArtifactHashes());
             } else if (f.exists() && f.isDirectory()) {
                 File[] contents = f.listFiles();
+                if (contents != null) {
                 for (int i = 0; i < contents.length; i++) {
                     recurseAndCollect(contents[i], hashmap);
+                }
                 }
             }
         }

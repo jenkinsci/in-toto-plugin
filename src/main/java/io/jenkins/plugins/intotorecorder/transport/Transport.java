@@ -9,8 +9,6 @@ import io.github.in_toto.models.Link;
 
 public abstract class Transport {
 
-    String uri;
-
     public abstract void submit(Link link);
 
     public static class TransportFactory {

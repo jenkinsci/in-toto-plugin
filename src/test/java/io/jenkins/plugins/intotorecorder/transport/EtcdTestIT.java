@@ -94,9 +94,15 @@ public class EtcdTestIT extends TestCase {
         };
         Response result = client.execute(get, handler);
 
+        if (result == null) {
+            throw new IOException("No response from HttpClient");
+        }
+
+        if (result.node.value != null) {
         System.out.println(result.node.value);
         assertTrue(result.node.value + "!= " + link.dumpString(),
-            result.node.value.equals(link.dumpString()));
+                result.node.value.equals(link.dumpString()));
+        }
 
 	}
 
