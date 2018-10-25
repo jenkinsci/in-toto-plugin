@@ -133,7 +133,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.credentialId = credentialId;
         if(credentialId != null && credentialId.length() != 0) {
             try {
-                loadKey(new InputStreamReader(getCredentials().getContent()));
+                loadKey(new InputStreamReader(getCredentials().getContent(), "UTF-8"));
             } catch (IOException e) {
                 throw new RuntimeException("credential with Id '" + credentialId + "' can't be read. ");
             }
@@ -238,7 +238,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     }
 
     /**
-     * Descriptor for {@link inTotoRecorder}. Used as a singleton. The class is
+     * Descriptor for {@link InTotoRecorder}. Used as a singleton. The class is
      * marked as public so that it can be accessed from views.
      *
      *
@@ -292,8 +292,10 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                 hashmap.put(artifact.getURI(), artifact.getArtifactHashes());
             } else if (f.exists() && f.isDirectory()) {
                 File[] contents = f.listFiles();
-                for (int i = 0; i < contents.length; i++) {
-                    recurseAndCollect(contents[i], hashmap);
+                if ( contents != null ) {
+                    for (int i = 0; i < contents.length; i++) {
+                        recurseAndCollect(contents[i], hashmap);
+                    }
                 }
             }
         }
@@ -356,7 +358,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         private static final long serialVersionUID = 2;
         transient Link link;
         transient Key key;
-        transient String keyPath;
+        String keyPath;
         String transportURL;
         String stepName;
 

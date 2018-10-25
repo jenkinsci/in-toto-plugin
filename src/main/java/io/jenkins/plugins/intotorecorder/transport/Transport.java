@@ -7,8 +7,11 @@ import java.net.URI;
 
 import io.github.in_toto.models.Link;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public abstract class Transport {
 
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD", justification = "It's existence helps to avoid docker error  for prepare-etcd-server")
     String uri;
 
     public abstract void submit(Link link);
