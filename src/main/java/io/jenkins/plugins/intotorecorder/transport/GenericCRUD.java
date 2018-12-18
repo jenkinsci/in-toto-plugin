@@ -28,9 +28,9 @@ public class GenericCRUD extends Transport {
         try {
             HttpRequest request = new NetHttpTransport()
                 .createRequestFactory()
-                .buildPutRequest(new GenericUrl(this.uri),
-                    ByteArrayContent.fromString("application/x-www-form-uriencoded", 
-                        link.toString()));
+                .buildPostRequest(new GenericUrl(this.uri),
+                    ByteArrayContent.fromString("application/x-www-form-uriencoded",
+                        link.dumpString()));
             HttpResponse response = request.execute();
             System.out.println(response.parseAsString());
 
@@ -38,7 +38,7 @@ public class GenericCRUD extends Transport {
              * but this gets the job done for a PoC
              */
         } catch (IOException e) {
-            throw new RuntimeException("couldn't serialize to HTTP server");
+            throw new RuntimeException("couldn't serialize to HTTP server: " + e);
         }
 
     }
