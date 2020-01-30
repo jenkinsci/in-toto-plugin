@@ -42,7 +42,7 @@ public class TransportTest extends TestCase {
         assertTrue(someTransport instanceof GenericCRUD);
 
         /* test creating Grafeas transports */
-        testUrl = new URI("grafeas+http://localhost:8080/v1beta1/projects/provider_example/occurrences?name=name&noteName=noteName&resourceUri=resourceUri");
+        testUrl = new URI("grafeas+http://localhost:8080/v1beta1/projects/provider_example/occurrences?noteName=noteName&resourceUri=resourceUri");
         someTransport = Transport.TransportFactory.transportForURI(testUrl);
         assertTrue(someTransport instanceof Grafeas);
 

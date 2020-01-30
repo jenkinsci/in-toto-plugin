@@ -23,14 +23,12 @@ public class Grafeas extends Transport {
     GrafeasOccurrence occurrence;
 
     public class GrafeasOccurrence {
-        public String name;
         public String noteName;
         public Map<String, String> resource = new HashMap<String, String>();
         public String kind = "INTOTO";
         public Link intoto;
 
-        public GrafeasOccurrence(String name, String noteName, String resourceUri) {
-            this.name = name;
+        public GrafeasOccurrence(String noteName, String resourceUri) {
             this.noteName = noteName;
             this.resource.put("uri", resourceUri);
         }
@@ -54,7 +52,6 @@ public class Grafeas extends Transport {
         Map<String, String> parameterMap = this.getParameterMap(parameterString);
 
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
-            parameterMap.get("name"),
             parameterMap.get("noteName"),
             parameterMap.get("resourceUri")
         );
