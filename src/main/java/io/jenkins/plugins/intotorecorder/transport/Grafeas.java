@@ -36,8 +36,8 @@ public class Grafeas extends Transport {
         }
     }
 
-    private static Map<String, String> getParameterMap(String paramaterString) {
-        String[] items = paramaterString.split("&");
+    private static Map<String, String> getParameterMap(String parameterString) {
+        String[] items = parameterString.split("&");
         Map<String, String> parameterMap = new HashMap<String, String>();
         for (String item : items) {
             String[] pair = item.split("=");
@@ -49,9 +49,9 @@ public class Grafeas extends Transport {
     public Grafeas(URI uri) {
         this.uri = uri;
 
-        String paramaterString = uri.getQuery();
-        
-        Map<String, String> parameterMap = this.getParameterMap(paramaterString);
+        String parameterString = uri.getQuery();
+
+        Map<String, String> parameterMap = this.getParameterMap(parameterString);
 
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
             parameterMap.get("name"),
@@ -68,7 +68,7 @@ public class Grafeas extends Transport {
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
 
-        String destination = this.uri.toString().split("?")[0].substring("grafeas+".length());
+        String destination = this.uri.toString().split("\\?")[0].substring("grafeas+".length());
 
         // FIXME: Shamelessly copied from GenericCRUD.java
         try {
