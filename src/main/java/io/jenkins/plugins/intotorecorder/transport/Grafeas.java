@@ -5,6 +5,8 @@ package io.jenkins.plugins.intotorecorder.transport;
 
 import io.github.in_toto.models.Link;
 import java.net.URI;
+import org.apache.http.client.utils.URIBuilder;
+import java.net.URISyntaxException;
 import java.util.*;
 import com.google.gson.Gson;
 
@@ -65,7 +67,26 @@ public class Grafeas extends Transport {
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
 
-        String destination = this.uri.toString().split("\\?")[0].substring("grafeas+".length());
+        String scheme = this.uri.getScheme().split("\\+")[1];
+
+        String authority = this.uri.getAuthority();
+
+        String path = this.uri.getPath();
+
+        URIBuilder uriBuilder = new URIBuilder();
+
+        String destination = "";
+
+        try {
+            destination = uriBuilder
+                .setScheme(scheme)
+                .setHost(authority)
+                .setPath(path)
+                .build()
+                .toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         // FIXME: Shamelessly copied from GenericCRUD.java
         try {
