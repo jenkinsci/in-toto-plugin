@@ -47,7 +47,21 @@ public class Grafeas extends Transport {
     }
 
     public Grafeas(URI uri) {
-        this.uri = uri;
+        String scheme = uri.getScheme().split("\\+")[1];
+        String authority = uri.getAuthority();
+        String path = uri.getPath();
+        URIBuilder uriBuilder = new URIBuilder();
+
+        try {
+            this.uri = uriBuilder
+                .setScheme(scheme)
+                .setHost(authority)
+                .setPath(path)
+                .build();
+                // .toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         String parameterString = uri.getQuery();
 
@@ -67,32 +81,11 @@ public class Grafeas extends Transport {
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
 
-        String scheme = this.uri.getScheme().split("\\+")[1];
-
-        String authority = this.uri.getAuthority();
-
-        String path = this.uri.getPath();
-
-        URIBuilder uriBuilder = new URIBuilder();
-
-        String destination = "";
-
-        try {
-            destination = uriBuilder
-                .setScheme(scheme)
-                .setHost(authority)
-                .setPath(path)
-                .build()
-                .toString();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
         // FIXME: Shamelessly copied from GenericCRUD.java
         try {
             HttpRequest request = new NetHttpTransport()
                 .createRequestFactory()
-                .buildPostRequest(new GenericUrl(destination),
+                .buildPostRequest(new GenericUrl(this.uri),
                     ByteArrayContent.fromString("application/x-www-form-uriencoded",
                         jsonString));
             HttpResponse response = request.execute();
