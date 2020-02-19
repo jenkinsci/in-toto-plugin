@@ -45,6 +45,9 @@ import org.jenkinsci.Symbol;
 
 import java.io.File;
 import java.io.Reader;
+import java.io.Writer;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -323,34 +326,25 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
         @Override
         public String invoke(File f, VirtualChannel channel) {
-
-            RSAKey key = loadKey(keyPath);
-
             Gson gson = new Gson();
             System.out.println(this.linkData);
             Link link = gson.fromJson(this.linkData, Link.class);
-            link.sign(key);
 
             /* if a transport is provided, let the master send the resulting
              * metadata */
-            if (transportURL == null) {
-                link.dump();
+            if (transportURL == null || transportURL.length() == 0) {
+                try {
+                    Writer writer = new OutputStreamWriter(
+                        new FileOutputStream(f), "UTF-8");
+                    link.dump(writer);
+                    writer.close();
+                } catch (IOException e) {
+                    throw new RuntimeException("Could not instantiate writer: " + e.toString());
+                }
             }
 
             return link.dumpString();
         }
-
-        private RSAKey loadKey(String keyPath) {
-            File keyFile = new File(keyPath);
-
-            if (!keyFile.exists()) {
-                throw new RuntimeException(" This signing keypath ("
-                        + keyPath + ") does not exist!");
-            }
-
-            return RSAKey.read(keyPath);
-        }
-
     }
 
     public static class PostWrap extends Disposer {
@@ -387,28 +381,29 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
             this.link.setProducts(InTotoWrapper.collectArtifacts(workspace));
 
-            Transport transport = null;
-
-            /* we ignore the error as it'll be handled in the next if */
-            try {
-                transport = Transport.TransportFactory.transportForURI(new URI(transportURL));
-            } catch (URISyntaxException | RuntimeException e) {}
-
             if (this.key != null) {
                 this.link.sign(key);
             } else if (this.keyPath != null) {
-                this.link = Link.read(dumpLink(workspace));
+                RSAKey key = loadKey(this.keyPath);
+                this.link.sign(key);
             } else {
-                listener.getLogger().println("[in-toto] Warning! no keypath specified. Not signing...");
+                listener.getLogger().println("[in-toto] Warning! no keypath " +
+                "specified. Not signing...");
             }
 
-            if (transportURL.length() == 0 || transport == null) {
-                listener.getLogger().println("[in-toto] No transport specified " +
-                        "(or transport not supported)" +
-                        " Dumping metadata to local directory");
-            } else {
-                listener.getLogger().println("[in-toto] Dumping metadata to: " + transport);
+            Transport transport = null;
+
+            try {
+                transport = Transport.TransportFactory.transportForURI(
+                    new URI(transportURL));
+                listener.getLogger().println("[in-toto] Dumping metadata to: " +
+                    transport);
                 transport.submit(this.link);
+            } catch (URISyntaxException | RuntimeException e) {
+                listener.getLogger().println("[in-toto] No transport " +
+                        "specified (or transport not supported)." +
+                        " Dumping metadata to local directory");
+                dumpLink(workspace);
             }
         }
 
@@ -427,6 +422,17 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                         "Can't create child node for link metadata " +
                         e.toString());
             }
+        }
+
+        private RSAKey loadKey(String keyPath) {
+            File keyFile = new File(keyPath);
+
+            if (!keyFile.exists()) {
+                throw new RuntimeException(" This signing keypath ("
+                        + keyPath + ") does not exist!");
+            }
+
+            return RSAKey.read(keyPath);
         }
     }
 }
