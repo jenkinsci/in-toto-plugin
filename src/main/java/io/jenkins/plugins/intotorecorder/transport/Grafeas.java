@@ -4,6 +4,8 @@
 package io.jenkins.plugins.intotorecorder.transport;
 
 import io.github.in_toto.models.Link;
+import io.github.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.keys.Signature;
 import java.net.URI;
 import org.apache.http.client.utils.URIBuilder;
 import java.net.URISyntaxException;
@@ -24,11 +26,86 @@ public class Grafeas extends Transport {
     URI uri;
     GrafeasOccurrence occurrence;
 
+    public class GrafeasInTotoMetadata {
+        public ArrayList<Signature> signatures = new ArrayList<Signature>();
+        public GrafeasInTotoLink signed;
+
+        public class GrafeasInTotoLink {
+            // This class exists to represent the Grafeas document format for
+            // in-toto links.
+
+            public class Artifact {
+                public String resourceUri;
+                public Map<String, String> hashes;
+
+                public Artifact(String resourceUri, Map<String, String> hashes) {
+                    this.resourceUri = resourceUri;
+                    this.hashes = hashes;
+                }
+
+            }
+
+            public List<String> command = new ArrayList<String>();
+            public List<Artifact> materials;
+            public List<Artifact> products;
+            public Map<String, Map<String, String>> byproducts;
+            public Map<String, Map<String, String>> environment;
+
+            // public GrafeasInTotoLink(Link link) {
+            public GrafeasInTotoLink(List<String> command,
+                                     Map<String, ArtifactHash> materials,
+                                     Map<String, ArtifactHash> products,
+                                     Map<String, Object> byproducts,
+                                     Map<String, Object> environment) {
+
+                this.command = command;
+
+                for (String artifactId : materials.keySet()) {
+                    String resourceUri = "file://sha256:" + materials.get(artifactId).get("sha256") + ":" + artifactId;
+                    Artifact artifact = new Artifact(resourceUri, (Map<String, String>)materials.get(artifactId));
+                    this.materials.add(artifact);
+                }
+
+                for (String artifactId : products.keySet()) {
+                    String resourceUri = "file://sha256:" + materials.get(artifactId).get("sha256") + ":" + artifactId;
+                    Artifact artifact = new Artifact(resourceUri, (Map<String, String>)products.get(artifactId));
+                    this.products.add(artifact);
+                }
+
+                Map<String, String> stringByproducts = new HashMap<String, String>();
+                for (String byproduct : byproducts.keySet()) {
+                    stringByproducts.put(byproduct, String.valueOf(byproducts.get(byproduct)));
+                }
+
+                Map<String, String> stringEnvironment = new HashMap<String, String>();
+                for (String env : environment.keySet()) {
+                    stringEnvironment.put(env, String.valueOf(environment.get(env)));
+                }
+
+                this.byproducts.put("customValues", stringByproducts);
+                this.environment.put("customValues", stringEnvironment);
+            }
+        }
+
+        public GrafeasInTotoMetadata(Link link) {
+            this.signatures = link.getSignatures();
+            // this.signed = new GrafeasInTotoLink(new Link(link.getSigned()));
+            this.signed = new GrafeasInTotoLink(
+                link.getCommand(),
+                link.getMaterials(),
+                link.getProducts(),
+                link.getByproducts(),
+                link.getEnvironment()
+            );
+        }
+    }
+
+
     public class GrafeasOccurrence {
         public String noteName;
         public Map<String, String> resource = new HashMap<String, String>();
         public String kind = "INTOTO";
-        public Link intoto;
+        public GrafeasInTotoMetadata intoto;
 
         public GrafeasOccurrence(String noteName, String resourceUri) {
             this.noteName = noteName;
@@ -76,7 +153,7 @@ public class Grafeas extends Transport {
     }
 
     public void submit(Link link) {
-        this.occurrence.intoto = link;
+        this.occurrence.intoto = new GrafeasInTotoMetadata(link);
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
