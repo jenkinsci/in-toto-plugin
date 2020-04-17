@@ -179,11 +179,11 @@ public class InTotoRecorder extends Recorder {
             listener.getLogger().println("[in-toto] Warning! no key specified. Not signing...");
         }
 
-        if (transport == null || transport.length() == 0) {
+        if (this.transport == null || this.transport.length() == 0) {
             listener.getLogger().println("[in-toto] No transport specified (or transport not supported)"
                     + " Dumping metadata to local directory");
         } else {
-            listener.getLogger().println("[in-toto] Dumping metadata to: " + transport);
+            listener.getLogger().println("[in-toto] Dumping metadata to: " + this.transport);
         }
         dumpLink();
 

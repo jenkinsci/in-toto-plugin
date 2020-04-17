@@ -46,12 +46,11 @@ public class Grafeas extends Transport {
             }
 
             public List<String> command = new ArrayList<String>();
-            public List<Artifact> materials;
-            public List<Artifact> products;
-            public Map<String, Map<String, String>> byproducts;
-            public Map<String, Map<String, String>> environment;
+            public List<Artifact> materials = new ArrayList<Artifact>();
+            public List<Artifact> products = new ArrayList<Artifact>();
+            public Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
+            public Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
 
-            // public GrafeasInTotoLink(Link link) {
             public GrafeasInTotoLink(List<String> command,
                                      Map<String, ArtifactHash> materials,
                                      Map<String, ArtifactHash> products,
@@ -60,15 +59,15 @@ public class Grafeas extends Transport {
 
                 this.command = command;
 
-                for (String artifactId : materials.keySet()) {
-                    String resourceUri = "file://sha256:" + materials.get(artifactId).get("sha256") + ":" + artifactId;
-                    Artifact artifact = new Artifact(resourceUri, (Map<String, String>)materials.get(artifactId));
+                for (Map.Entry<String, ArtifactHash> material : materials.entrySet()) {
+                    // FIXME: String resourceUri = "file://sha256:" + material.getValue().get("sha256") + ":" + material.getKey();
+                    Artifact artifact = new Artifact(material.getKey(), (Map<String, String>)material.getValue());
                     this.materials.add(artifact);
                 }
 
-                for (String artifactId : products.keySet()) {
-                    String resourceUri = "file://sha256:" + materials.get(artifactId).get("sha256") + ":" + artifactId;
-                    Artifact artifact = new Artifact(resourceUri, (Map<String, String>)products.get(artifactId));
+                for (Map.Entry<String, ArtifactHash> product : products.entrySet()) {
+                    // FIXME: String resourceUri = "file://sha256:" + product.getValue().get("sha256") + ":" + product.getKey();
+                    Artifact artifact = new Artifact(product.getKey(), (Map<String, String>)product.getValue());
                     this.products.add(artifact);
                 }
 
@@ -89,7 +88,6 @@ public class Grafeas extends Transport {
 
         public GrafeasInTotoMetadata(Link link) {
             this.signatures = link.getSignatures();
-            // this.signed = new GrafeasInTotoLink(new Link(link.getSigned()));
             this.signed = new GrafeasInTotoLink(
                 link.getCommand(),
                 link.getMaterials(),
@@ -135,9 +133,8 @@ public class Grafeas extends Transport {
                 .setHost(authority)
                 .setPath(path)
                 .build();
-                // .toString();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            throw new RuntimeException("unable to build Grafeas URI: " + e.toString());
         }
 
         String parameterString = uri.getQuery();
@@ -157,13 +154,14 @@ public class Grafeas extends Transport {
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
+        GenericUrl url = new GenericUrl(this.uri);
 
         // FIXME: Shamelessly copied from GenericCRUD.java
         try {
             HttpRequest request = new NetHttpTransport()
                 .createRequestFactory()
-                .buildPostRequest(new GenericUrl(this.uri),
-                    ByteArrayContent.fromString("application/x-www-form-uriencoded",
+                .buildPostRequest(url,
+                    ByteArrayContent.fromString("application/json",
                         jsonString));
             HttpResponse response = request.execute();
             System.out.println(response.parseAsString());
@@ -172,7 +170,8 @@ public class Grafeas extends Transport {
              * but this gets the job done for a PoC
              */
         } catch (IOException e) {
-            throw new RuntimeException("couldn't serialize to HTTP server: " + e);
+            throw new RuntimeException("for URL " + url.toString() +
+                " couldn't serialize to HTTP server: " + e.toString());
         }
     }
 }
