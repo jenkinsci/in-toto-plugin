@@ -164,7 +164,6 @@ public class GrafeasTransport extends Transport {
                     ByteArrayContent.fromString("application/json",
                         jsonString));
             HttpResponse response = request.execute();
-            System.out.println(response.parseAsString());
 
             /* FIXME: should handle error codes and other situations more appropriately,
              * but this gets the job done for a PoC
