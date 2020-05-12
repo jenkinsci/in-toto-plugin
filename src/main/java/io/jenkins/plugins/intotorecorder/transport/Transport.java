@@ -31,7 +31,7 @@ public abstract class Transport {
             }
 
             if (uri.getScheme().startsWith("grafeas")) {
-                return new Grafeas(uri);
+                return new GrafeasTransport(uri);
             }
 
             if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {

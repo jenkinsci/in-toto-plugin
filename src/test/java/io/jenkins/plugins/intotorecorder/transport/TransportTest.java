@@ -44,7 +44,7 @@ public class TransportTest extends TestCase {
         /* test creating Grafeas transports */
         testUrl = new URI("grafeas+http://localhost:8080/v1beta1/projects/provider_example/occurrences?noteName=noteName&resourceUri=resourceUri");
         someTransport = Transport.TransportFactory.transportForURI(testUrl);
-        assertTrue(someTransport instanceof Grafeas);
+        assertTrue(someTransport instanceof GrafeasTransport);
 
 	}
 }

@@ -21,7 +21,7 @@ import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 
 
-public class Grafeas extends Transport {
+public class GrafeasTransport extends Transport {
 
     URI uri;
     GrafeasOccurrence occurrence;
@@ -121,7 +121,7 @@ public class Grafeas extends Transport {
         return parameterMap;
     }
 
-    public Grafeas(URI uri) {
+    public GrafeasTransport(URI uri) {
         String scheme = uri.getScheme().split("\\+")[1];
         String authority = uri.getAuthority();
         String path = uri.getPath();
@@ -139,7 +139,7 @@ public class Grafeas extends Transport {
 
         String parameterString = uri.getQuery();
 
-        Map<String, String> parameterMap = Grafeas.getParameterMap(parameterString);
+        Map<String, String> parameterMap = GrafeasTransport.getParameterMap(parameterString);
 
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
             parameterMap.get("noteName"),
