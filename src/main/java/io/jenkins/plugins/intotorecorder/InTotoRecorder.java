@@ -183,7 +183,7 @@ public class InTotoRecorder extends Recorder {
             listener.getLogger().println("[in-toto] No transport specified (or transport not supported)"
                     + " Dumping metadata to local directory");
         } else {
-            listener.getLogger().println("[in-toto] Dumping metadata to: " + this.transport);
+            listener.getLogger().println("[in-toto] Dumping metadata to: " + transport);
         }
         dumpLink();
 
