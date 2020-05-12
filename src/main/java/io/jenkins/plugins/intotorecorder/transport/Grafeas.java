@@ -139,7 +139,7 @@ public class Grafeas extends Transport {
 
         String parameterString = uri.getQuery();
 
-        Map<String, String> parameterMap = this.getParameterMap(parameterString);
+        Map<String, String> parameterMap = Grafeas.getParameterMap(parameterString);
 
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
             parameterMap.get("noteName"),
