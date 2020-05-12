@@ -27,6 +27,9 @@ public class GrafeasTransport extends Transport {
     GrafeasOccurrence occurrence;
 
     public class GrafeasInTotoMetadata {
+        // This class exists to represent the signed document format for Grafeas
+        // in-toto links.
+
         public ArrayList<Signature> signatures = new ArrayList<Signature>();
         public GrafeasInTotoLink signed;
 
