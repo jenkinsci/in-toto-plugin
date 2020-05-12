@@ -30,11 +30,11 @@ public class GrafeasTransport extends Transport {
         public ArrayList<Signature> signatures = new ArrayList<Signature>();
         public GrafeasInTotoLink signed;
 
-        public class GrafeasInTotoLink {
+        private class GrafeasInTotoLink {
             // This class exists to represent the Grafeas document format for
             // in-toto links.
 
-            public class Artifact {
+            private class Artifact {
                 public String resourceUri;
                 public Map<String, String> hashes;
 
