@@ -403,7 +403,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                 listener.getLogger().println("[in-toto] No transport " +
                         "specified (or transport not supported)." +
                         " Dumping metadata to local directory");
-                listener.getLogger().println("[in-toto] " + e.toString());
                 dumpLink(workspace);
             }
         }

@@ -26,33 +26,40 @@ public class GrafeasTransport extends Transport {
     URI uri;
     GrafeasOccurrence occurrence;
 
-    public class GrafeasInTotoMetadata {
+    public static class GrafeasInTotoMetadata {
         // This class exists to represent the signed document format for Grafeas
         // in-toto links.
 
-        public ArrayList<Signature> signatures = new ArrayList<Signature>();
-        public GrafeasInTotoLink signed;
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        private ArrayList<Signature> signatures = new ArrayList<Signature>();
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        private GrafeasInTotoLink signed;
 
-        private class GrafeasInTotoLink {
+        private static class GrafeasInTotoLink {
             // This class exists to represent the Grafeas document format for
             // in-toto links.
 
-            private class Artifact {
-                public String resourceUri;
-                public Map<String, String> hashes;
+            private static class Artifact {
+                @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+                private String resourceUri;
+                @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+                private Map<String, String> hashes;
 
-                public Artifact(String resourceUri, Map<String, String> hashes) {
+                private Artifact(String resourceUri, Map<String, String> hashes) {
                     this.resourceUri = resourceUri;
                     this.hashes = hashes;
                 }
 
             }
 
-            public List<String> command = new ArrayList<String>();
-            public List<Artifact> materials = new ArrayList<Artifact>();
-            public List<Artifact> products = new ArrayList<Artifact>();
-            public Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
-            public Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
+            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            private List<String> command = new ArrayList<String>();
+            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            private List<Artifact> materials = new ArrayList<Artifact>();
+            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            private List<Artifact> products = new ArrayList<Artifact>();
+            private Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
+            private Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
 
             public GrafeasInTotoLink(List<String> command,
                                      Map<String, ArtifactHash> materials,
@@ -75,13 +82,13 @@ public class GrafeasTransport extends Transport {
                 }
 
                 Map<String, String> stringByproducts = new HashMap<String, String>();
-                for (String byproduct : byproducts.keySet()) {
-                    stringByproducts.put(byproduct, String.valueOf(byproducts.get(byproduct)));
+                for (Map.Entry<String, Object> entry : byproducts.entrySet()) {
+                    stringByproducts.put(entry.getKey(), String.valueOf(entry.getValue()));
                 }
 
                 Map<String, String> stringEnvironment = new HashMap<String, String>();
-                for (String env : environment.keySet()) {
-                    stringEnvironment.put(env, String.valueOf(environment.get(env)));
+                for (Map.Entry<String, Object> entry : environment.entrySet()) {
+                    stringEnvironment.put(entry.getKey(), String.valueOf(entry.getValue()));
                 }
 
                 this.byproducts.put("customValues", stringByproducts);
@@ -102,11 +109,14 @@ public class GrafeasTransport extends Transport {
     }
 
 
-    public class GrafeasOccurrence {
-        public String noteName;
-        public Map<String, String> resource = new HashMap<String, String>();
-        public String kind = "INTOTO";
-        public GrafeasInTotoMetadata intoto;
+    public static class GrafeasOccurrence {
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        private String noteName;
+        private Map<String, String> resource = new HashMap<String, String>();
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        private String kind = "INTOTO";
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        private GrafeasInTotoMetadata intoto;
 
         public GrafeasOccurrence(String noteName, String resourceUri) {
             this.noteName = noteName;
@@ -144,6 +154,7 @@ public class GrafeasTransport extends Transport {
 
         Map<String, String> parameterMap = GrafeasTransport.getParameterMap(parameterString);
 
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
             parameterMap.get("noteName"),
             parameterMap.get("resourceUri")
