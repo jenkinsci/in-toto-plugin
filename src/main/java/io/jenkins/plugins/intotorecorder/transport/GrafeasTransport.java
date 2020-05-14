@@ -7,7 +7,6 @@ import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Artifact.ArtifactHash;
 import io.github.in_toto.keys.Signature;
 import java.net.URI;
-import org.apache.http.client.utils.URIBuilder;
 import java.net.URISyntaxException;
 import java.util.*;
 import com.google.gson.Gson;
@@ -23,7 +22,7 @@ import com.google.api.client.http.GenericUrl;
 
 public class GrafeasTransport extends Transport {
 
-    URI uri;
+    GenericUrl uri;
     GrafeasOccurrence occurrence;
 
     public static class GrafeasInTotoMetadata {
@@ -136,19 +135,8 @@ public class GrafeasTransport extends Transport {
 
     public GrafeasTransport(URI uri) {
         String scheme = uri.getScheme().split("\\+")[1];
-        String authority = uri.getAuthority();
-        String path = uri.getPath();
-        URIBuilder uriBuilder = new URIBuilder();
-
-        try {
-            this.uri = uriBuilder
-                .setScheme(scheme)
-                .setHost(authority)
-                .setPath(path)
-                .build();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("unable to build Grafeas URI: " + e.toString());
-        }
+        this.uri = new GenericUrl(uri);
+        this.uri.setScheme(scheme);
 
         String parameterString = uri.getQuery();
 
@@ -168,13 +156,12 @@ public class GrafeasTransport extends Transport {
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
-        GenericUrl url = new GenericUrl(this.uri);
 
         // FIXME: Shamelessly copied from GenericCRUD.java
         try {
             HttpRequest request = new NetHttpTransport()
                 .createRequestFactory()
-                .buildPostRequest(url,
+                .buildPostRequest(this.uri,
                     ByteArrayContent.fromString("application/json",
                         jsonString));
             HttpResponse response = request.execute();
@@ -183,7 +170,7 @@ public class GrafeasTransport extends Transport {
              * but this gets the job done for a PoC
              */
         } catch (IOException e) {
-            throw new RuntimeException("for URL " + url.toString() +
+            throw new RuntimeException("for URL " + this.uri.toString() +
                 " couldn't serialize to HTTP server: " + e.toString());
         }
     }
