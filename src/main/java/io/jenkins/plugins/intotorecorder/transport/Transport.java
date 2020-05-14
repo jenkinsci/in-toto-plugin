@@ -30,6 +30,10 @@ public abstract class Transport {
                 return new Redis(uri);
             }
 
+            if (uri.getScheme().startsWith("grafeas")) {
+                return new GrafeasTransport(uri);
+            }
+
             if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
                 return new GenericCRUD(uri);
             }

@@ -43,7 +43,7 @@
     <repository>
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
-      </repository>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>io.github.in-toto</groupId>
       <artifactId>in-toto</artifactId>
-      <version>0.2</version>
+      <version>0.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
