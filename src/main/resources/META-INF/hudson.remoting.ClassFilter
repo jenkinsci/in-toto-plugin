@@ -7,3 +7,4 @@ org.bouncycastle.asn1.DERNull
 org.bouncycastle.asn1.DERBitString
 org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 org.bouncycastle.asn1.DEROctetString
+org.bouncycastle.crypto.CipherParameters

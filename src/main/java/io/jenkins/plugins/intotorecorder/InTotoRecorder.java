@@ -272,7 +272,7 @@ public class InTotoRecorder extends Recorder {
      *
      *
      * See
-     * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+     * src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension
