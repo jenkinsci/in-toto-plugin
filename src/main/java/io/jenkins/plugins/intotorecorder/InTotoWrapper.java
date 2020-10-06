@@ -246,7 +246,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      *
      *
      * See
-     * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+     * src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension
@@ -350,7 +350,9 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     public static class PostWrap extends Disposer {
 
         private static final long serialVersionUID = 2;
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Link link;
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Key key;
         String keyPath;
         String transportURL;
@@ -403,6 +405,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                 listener.getLogger().println("[in-toto] No transport " +
                         "specified (or transport not supported)." +
                         " Dumping metadata to local directory");
+                listener.getLogger().println(e);
                 dumpLink(workspace);
             }
         }
