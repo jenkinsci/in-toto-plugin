@@ -100,7 +100,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     private String stepName;
 
     /**
-     * The host URL/URI where to post the in-toto metdata.
+     * The host URL/URI where to post the in-toto metadata.
      *
      * Protocol information *must* be included.
      */
