@@ -89,7 +89,7 @@ As of now, the current limitations exist:
   *should* work, there may be some rough edges to fix up.
 - If using the credentialId, the metadata will be signed in master.
 - There should be other interesting settings to add (e.g., ignore patterns,
-  etc.). Right now, and due to the way the workspaces are created in Jenknis,
+  etc.). Right now, and due to the way the workspaces are created in Jenkins,
   the whole of the .git folder is tracked upon execution (which increases the
   metadata size significantly). A mechanism like .in-totoignore files in the
   python implementation would be useful

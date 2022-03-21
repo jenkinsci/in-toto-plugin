@@ -89,7 +89,7 @@ public class InTotoRecorder extends Recorder {
     private String stepName;
 
     /**
-     * The host URL/URI where to post the in-toto metdata.
+     * The host URL/URI where to post the in-toto metadata.
      *
      * Protocol information *must* be included.
      */
@@ -191,7 +191,7 @@ public class InTotoRecorder extends Recorder {
     }
 
     /* Private method that will help me publish metadata in a transport agnostic way. Most likely
-     * by buffering and sending stuff over the wire once it's serialized to teporary directory
+     * by buffering and sending stuff over the wire once it's serialized to temporary directory
      */
     private void dumpLink() {
         String linkName = this.cwd.toString() + "/" + stepName + ".xxxx.link";
@@ -284,7 +284,7 @@ public class InTotoRecorder extends Recorder {
         }
 
         /**
-         * This human readable name is used in the configuration screen.
+         * This human-readable name is used in the configuration screen.
          */
         public String getDisplayName() {return "in-toto provenance plugin";}
 
