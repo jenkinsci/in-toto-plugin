@@ -1,3 +1,5 @@
 # Jenkins plugin relevant stuff
 target/*
 work/*
+.idea
+.vscode
