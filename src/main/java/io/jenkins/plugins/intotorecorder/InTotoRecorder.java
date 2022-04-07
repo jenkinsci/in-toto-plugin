@@ -149,7 +149,7 @@ public class InTotoRecorder extends Recorder {
         this.cwd = build.getWorkspace();
         String  cwdStr;
         if (this.cwd != null) {
-            cwdStr = this.cwd.toString();
+            cwdStr = this.cwd+"";
         } else {
             throw new RuntimeException("[in-toto] Cannot get the build workspace");
         }
@@ -194,7 +194,7 @@ public class InTotoRecorder extends Recorder {
      * by buffering and sending stuff over the wire once it's serialized to temporary directory
      */
     private void dumpLink() {
-        String linkName = this.cwd.toString() + "/" + stepName + ".xxxx.link";
+        String linkName = this.cwd + "/" + stepName + ".xxxx.link";
         this.link.dump(linkName);
     }
 
@@ -237,7 +237,7 @@ public class InTotoRecorder extends Recorder {
         FileCredentials fileCredential = CredentialsMatchers.firstOrNull(
             CredentialsProvider.lookupCredentials(
                     FileCredentials.class,
-                    Jenkins.getInstance(),
+                    Jenkins.get(),
                     ACL.SYSTEM,
                     Collections.<DomainRequirement>emptyList()
             ),
@@ -295,7 +295,7 @@ public class InTotoRecorder extends Recorder {
 
             StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
-                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return result.includeCurrentValue(credentialId);
                 }
             } else {
@@ -307,7 +307,7 @@ public class InTotoRecorder extends Recorder {
             return result
                     .includeEmptyValue()
                     .includeAs(ACL.SYSTEM,
-                    Jenkins.getInstance(),
+                    Jenkins.get(),
                     FileCredentials.class)
                     .includeCurrentValue(credentialId);
         }
@@ -317,7 +317,7 @@ public class InTotoRecorder extends Recorder {
          */
         public FormValidation doCheckCredentialId(@AncestorInPath Item item, @QueryParameter String value) {
             if (item == null) {
-                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
                 }
             } else {

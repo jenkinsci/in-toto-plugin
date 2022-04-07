@@ -214,7 +214,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         FileCredentials fileCredential = CredentialsMatchers.firstOrNull(
             CredentialsProvider.lookupCredentials(
                     FileCredentials.class,
-                    Jenkins.getInstance(),
+                    Jenkins.get(),
                     ACL.SYSTEM,
                     Collections.<DomainRequirement>emptyList()
             ),
