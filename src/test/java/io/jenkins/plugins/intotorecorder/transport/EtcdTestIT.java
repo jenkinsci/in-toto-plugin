@@ -6,6 +6,8 @@ package io.jenkins.plugins.intotorecorder.transport;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.util.RunList;
+import io.github.intoto.legacy.keys.RSAKey;
+import io.github.intoto.legacy.models.Link;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -29,9 +31,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.HttpResponse;
-
-import io.github.in_toto.models.Link;
-import io.github.in_toto.keys.RSAKey;
 
 import java.net.URI;
 import java.lang.System;
