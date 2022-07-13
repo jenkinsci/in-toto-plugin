@@ -5,11 +5,12 @@ package io.jenkins.plugins.intotorecorder.transport;
 
 import java.io.IOException;
 
-import io.github.in_toto.models.Link;
-
 import java.net.URI;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
+
+import io.github.intoto.legacy.models.Link;
+
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.ByteArrayContent;

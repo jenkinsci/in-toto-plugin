@@ -2,14 +2,14 @@
  *
  */
 package io.jenkins.plugins.intotorecorder.transport;
-
-import io.github.in_toto.models.Link;
-import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.keys.Signature;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import com.google.gson.Gson;
+
+import io.github.intoto.legacy.keys.Signature;
+import io.github.intoto.legacy.models.Link;
+import io.github.intoto.legacy.models.Artifact.ArtifactHash;
 
 import java.io.IOException;
 
@@ -29,9 +29,9 @@ public class GrafeasTransport extends Transport {
         // This class exists to represent the signed document format for Grafeas
         // in-toto links.
 
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private ArrayList<Signature> signatures = new ArrayList<Signature>();
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private GrafeasInTotoLink signed;
 
         private static class GrafeasInTotoLink {
@@ -39,9 +39,9 @@ public class GrafeasTransport extends Transport {
             // in-toto links.
 
             private static class Artifact {
-                @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+                @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
                 private String resourceUri;
-                @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+                @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
                 private Map<String, String> hashes;
 
                 private Artifact(String resourceUri, Map<String, String> hashes) {
@@ -51,11 +51,11 @@ public class GrafeasTransport extends Transport {
 
             }
 
-            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
             private List<String> command = new ArrayList<String>();
-            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
             private List<Artifact> materials = new ArrayList<Artifact>();
-            @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
             private List<Artifact> products = new ArrayList<Artifact>();
             private Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
             private Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
@@ -109,12 +109,12 @@ public class GrafeasTransport extends Transport {
 
 
     public static class GrafeasOccurrence {
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private String noteName;
         private Map<String, String> resource = new HashMap<String, String>();
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private String kind = "INTOTO";
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private GrafeasInTotoMetadata intoto;
 
         public GrafeasOccurrence(String noteName, String resourceUri) {
@@ -142,7 +142,7 @@ public class GrafeasTransport extends Transport {
 
         Map<String, String> parameterMap = GrafeasTransport.getParameterMap(parameterString);
 
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         GrafeasOccurrence occurrence = new GrafeasOccurrence(
             parameterMap.get("noteName"),
             parameterMap.get("resourceUri")
@@ -164,7 +164,7 @@ public class GrafeasTransport extends Transport {
                 .buildPostRequest(this.uri,
                     ByteArrayContent.fromString("application/json",
                         jsonString));
-            HttpResponse response = request.execute();
+            request.execute();
 
             /* FIXME: should handle error codes and other situations more appropriately,
              * but this gets the job done for a PoC
