@@ -5,12 +5,16 @@ package io.jenkins.plugins.intotorecorder;
 
 import io.github.intoto.legacy.keys.Key;
 import io.github.intoto.legacy.keys.RSAKey;
+import io.github.intoto.legacy.lib.NumericJSONSerializer;
 import io.github.intoto.legacy.models.Artifact;
 import io.github.intoto.legacy.models.Link;
 import io.github.intoto.legacy.models.Artifact.ArtifactHash;
+import io.github.intoto.slsa.models.v02.*;
 import io.jenkins.plugins.intotorecorder.transport.Transport;
 
+import com.google.common.util.concurrent.Service.Listener;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
@@ -38,7 +42,6 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
-
 import org.jenkinsci.Symbol;
 
 import java.io.File;
@@ -49,14 +52,27 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.lang.InterruptedException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import jenkins.tasks.SimpleBuildWrapper;
 import jenkins.tasks.SimpleBuildWrapper.Context;
@@ -122,6 +138,12 @@ public class InTotoWrapper extends SimpleBuildWrapper {
      */
     private FilePath cwd;
 
+    /**
+     * PRovenance metadata used to record this step
+     *
+     */
+    private Provenance provenance;
+
     @DataBoundConstructor
     public InTotoWrapper(String credentialId, String keyPath, String stepName, String transport)
     {
@@ -186,11 +208,119 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.link = new Link(null, null, this.stepName, null, null, null);
         this.link.setMaterials(InTotoWrapper.collectArtifacts(this.cwd));
 
+        //Setting up Provenance object
+        this.provenance = new Provenance();
+
+        //Setting up the builder
+        setBuilder(initialEnvironment);
+
+        //setting up materials
+        setProvenanceMaterials();
+
+        //setting up Invocation
+        BuildInvocation invocation = new BuildInvocation();
+        invocation.setEnvironments(initialEnvironment);
+        invocation.setConfigSource(initialEnvironment);
+        provenance.setInvocation(invocation);
+
+        //Setting up Metadata
+        setMetadata(initialEnvironment);
+
         listener.getLogger().println("[in-toto] Dumping metadata... ");
 
-        context.setDisposer(new PostWrap(this.link, this.key, this.keyPath, this.stepName,
+        context.setDisposer(new PostWrap(this.link, this.provenance, this.key, this.keyPath, this.stepName,
                     this.transport));
     }
+
+    private void setProvenanceMaterials() {
+
+        HashMap<String, ArtifactHash> materials =new HashMap<String, ArtifactHash>();
+        materials=link.getMaterials();
+
+        Iterator hmIterator = materials.entrySet().iterator();
+        List<Material> provenanceMaterials = new ArrayList<Material>();
+
+        while (hmIterator.hasNext()) {
+            Material material=new Material();
+            Map.Entry<String, ArtifactHash> new_Map = (Map.Entry<String, ArtifactHash>)hmIterator.next();
+            material.setUri(new_Map.getKey());
+            material.setDigest(new_Map.getValue());
+            provenanceMaterials.add(material);
+        }
+
+        this.provenance.setMaterials(provenanceMaterials);
+    }
+
+    private void setBuilder(EnvVars initialEnvironment){
+
+        Builder builder = new Builder();
+        builder.setId(initialEnvironment.get("JENKINS_URL")+"@"+initialEnvironment.get("NODE_NAME"));
+
+        this.provenance.setBuilder(builder);
+    }
+
+    private class BuildInvocation extends Invocation{
+        private Map<String,String> environment;
+
+        private Object parameters;
+
+        public void setEnvironments(EnvVars initialEnvironment){
+            environment=initialEnvironment;
+            environment.remove("HUDSON_SERVER_COOKIE");
+            environment.remove("JENKINS_SERVER_COOKIE");
+        }
+
+        public Map<String,String> getEnvironments(){
+            return environment;
+        }
+
+        public void setConfigSource(EnvVars initialEnvironment){
+
+            ConfigSource configSource=new ConfigSource();
+            String git_url=initialEnvironment.get("GIT_URL");
+            configSource.setUri(git_url);
+
+            String lastCommit=initialEnvironment.get("GIT_COMMIT");
+
+            Map<String,String> uriDigestMap=new HashMap<String,String>();
+            uriDigestMap.put("sha1", lastCommit);
+            configSource.setDigest(uriDigestMap);
+
+            configSource.setEntryPoint("Jenkinsfile");
+
+            super.setConfigSource(configSource);
+        }
+    }
+
+    private void setMetadata(EnvVars initialEnvironment){
+        Metadata metadata=new Metadata();
+
+        //Setting up Build Invocation Id
+        metadata.setBuildInvocationId(initialEnvironment.get("INVOCATION_ID"));
+
+        //Setting up Build Start Time
+        Instant instant = Instant.ofEpochMilli(ZonedDateTime.now().toInstant().toEpochMilli());
+        OffsetDateTime offsetTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
+        metadata.setBuildStartedOn(offsetTime);
+
+        /*
+         * FIXME: All the completeness parameters are set to false for now.
+         * Discuss what completeness means for each field and what would be required to make them true. 
+         *
+         */
+
+        //Setting up Completeness object.
+        Completeness completeness = new Completeness();
+        completeness.setEnvironment(false);
+        completeness.setMaterials(false);
+        completeness.setParameters(false);
+
+        metadata.setReproducible(false);
+
+        metadata.setCompleteness(completeness);
+        this.provenance.setMetadata(metadata);
+    }
+
 
     private void loadKey(Reader reader) {
         this.key = RSAKey.readPemBuffer(reader);
@@ -346,11 +476,56 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         }
     }
 
+        /**
+     *
+     * Private class to dump the provenance metadata to the local workspace of the worker
+     */
+    private static final class ProvenanceSerializer
+            extends MasterToSlaveFileCallable<String> {
+        private static final long serialVersionUID = 2;
+
+        String ProvenanceData;
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
+        String keyPath;
+        String transportURL;
+
+        private ProvenanceSerializer(String ProvenanceData, String keyPath, String transportURL) {
+            this.ProvenanceData = ProvenanceData;
+            this.keyPath = keyPath;
+            this.transportURL = transportURL;
+        }
+
+        @Override
+        public String invoke(File f, VirtualChannel channel) {
+            Gson gson = new Gson();
+            Provenance provenance = gson.fromJson(this.ProvenanceData, Provenance.class);
+
+            /* if a transport is provided, let the master send the resulting
+             * metadata */
+            if (transportURL == null || transportURL.length() == 0) {
+                try {
+                    Writer writer = new OutputStreamWriter(
+                        new FileOutputStream(f), "UTF-8");
+                        writer.write(this.ProvenanceData);
+                        writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    throw new RuntimeException("Could not instantiate writer: " + e.toString());
+                }
+            }
+
+            return this.ProvenanceData;
+        }
+    }
+
+
     public static class PostWrap extends Disposer {
 
         private static final long serialVersionUID = 2;
         @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Link link;
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
+        transient Provenance provenance;
         @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Key key;
         String keyPath;
@@ -358,11 +533,12 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         String stepName;
 
-        public PostWrap(Link link, Key key, String keyPath, String stepName,
+        public PostWrap(Link link,Provenance provenance, Key key, String keyPath, String stepName,
                 String transportURL) {
             super();
 
             this.link = link;
+            this.provenance=provenance;
             this.key = key;
             this.keyPath = keyPath;
             this.stepName = stepName;
@@ -393,6 +569,10 @@ public class InTotoWrapper extends SimpleBuildWrapper {
                 "specified. Not signing...");
             }
 
+            Instant instant = Instant.ofEpochMilli(ZonedDateTime.now().toInstant().toEpochMilli());
+            OffsetDateTime offsetTime = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
+            provenance.getMetadata().setBuildFinishedOn(offsetTime);
+
             Transport transport = null;
 
             try {
@@ -416,8 +596,18 @@ public class InTotoWrapper extends SimpleBuildWrapper {
          */
         private String dumpLink(FilePath cwd) {
 
+            Gson gson = new GsonBuilder()
+            .serializeNulls()
+            // Use custom serializer to enforce non-floating point numbers
+            .registerTypeAdapter(Double.class, new NumericJSONSerializer())
+            .setPrettyPrinting()
+            .create();
+
             try {
                 FilePath linkPath = cwd.child(link.getFullName());
+                FilePath provenancePath = cwd.child(this.stepName+"_SLSA_Provenance"+".json");
+                provenancePath.act(new ProvenanceSerializer(gson.toJson(provenance), this.keyPath,
+                            this.transportURL));
                 return linkPath.act(new LinkSerializer(this.link.dumpString(), this.keyPath,
                             this.transportURL));
             } catch(IOException | InterruptedException e) {
