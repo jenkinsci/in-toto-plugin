@@ -7,12 +7,13 @@ import java.io.IOException;
 
 import java.net.URI;
 
-import io.github.in_toto.models.Link;
-
 // import com.coreos.jetcd.Client;
 // import com.coreos.jetcd.data.ByteSequence;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
+
+import io.github.intoto.legacy.models.Link;
+
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -50,7 +51,7 @@ public class Etcd extends Transport {
                     ByteArrayContent.fromString("application/x-www-form-urlencoded",
                         "value=" + link.dumpString()));
 
-            HttpResponse response = request.execute();
+            request.execute();
         } catch (IOException e) {
             throw new RuntimeException("Couldn't serialize link: " +
                     link.getFullName() + ".Error was: " + e.toString());

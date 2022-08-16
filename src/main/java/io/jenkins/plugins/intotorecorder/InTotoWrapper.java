@@ -3,14 +3,12 @@
  */
 package io.jenkins.plugins.intotorecorder;
 
+import io.github.intoto.legacy.keys.Key;
+import io.github.intoto.legacy.keys.RSAKey;
+import io.github.intoto.legacy.models.Artifact;
+import io.github.intoto.legacy.models.Link;
+import io.github.intoto.legacy.models.Artifact.ArtifactHash;
 import io.jenkins.plugins.intotorecorder.transport.Transport;
-
-import io.github.in_toto.models.Link;
-import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.models.Artifact;
-
-import io.github.in_toto.keys.Key;
-import io.github.in_toto.keys.RSAKey;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -313,6 +311,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         private static final long serialVersionUID = 2;
 
         String linkData;
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         String keyPath;
         String transportURL;
 
@@ -350,12 +349,13 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     public static class PostWrap extends Disposer {
 
         private static final long serialVersionUID = 2;
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Link link;
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORE")
         transient Key key;
         String keyPath;
         String transportURL;
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         String stepName;
 
         public PostWrap(Link link, Key key, String keyPath, String stepName,

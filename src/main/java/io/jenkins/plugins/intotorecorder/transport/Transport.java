@@ -5,9 +5,8 @@ package io.jenkins.plugins.intotorecorder.transport;
 
 import java.net.URI;
 
-import io.github.in_toto.models.Link;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.intoto.legacy.models.Link;
 
 public abstract class Transport {
 

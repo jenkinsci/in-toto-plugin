@@ -3,13 +3,6 @@
  */
 package io.jenkins.plugins.intotorecorder;
 
-import io.github.in_toto.models.Link;
-import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.models.Artifact;
-
-import io.github.in_toto.keys.Key;
-import io.github.in_toto.keys.RSAKey;
-
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
@@ -18,6 +11,11 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
+import io.github.intoto.legacy.keys.Key;
+import io.github.intoto.legacy.keys.RSAKey;
+import io.github.intoto.legacy.models.Artifact;
+import io.github.intoto.legacy.models.Link;
+import io.github.intoto.legacy.models.Artifact.ArtifactHash;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.remoting.VirtualChannel;
@@ -72,6 +70,7 @@ public class InTotoRecorder extends Recorder {
      *
      * If not defined signing will not be performed.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
     private String keyPath;
 
     /**
@@ -79,6 +78,7 @@ public class InTotoRecorder extends Recorder {
      *
      * If not defined signing will not be performed.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
     private String credentialId;
 
     /**
@@ -86,6 +86,7 @@ public class InTotoRecorder extends Recorder {
      *
      * If not defined, will default to step
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
     private String stepName;
 
     /**
@@ -93,6 +94,7 @@ public class InTotoRecorder extends Recorder {
      *
      * Protocol information *must* be included.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
     private String transport;
 
     /**
@@ -104,6 +106,7 @@ public class InTotoRecorder extends Recorder {
     /**
      * Loaded key used to sign metadata
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("UUF_UNUSED_FIELD")
     private Key key;
 
     /**
@@ -123,7 +126,7 @@ public class InTotoRecorder extends Recorder {
 
         /* notice how we can't do the same for the key, as that'd be a security
          * hazard */
-
+            
         this.credentialId = credentialId;
         this.keyPath = keyPath;
 
