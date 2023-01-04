@@ -258,8 +258,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     private class BuildInvocation extends Invocation{
         private Map<String,String> environment;
 
-        private Object parameters;
-
         public void setEnvironments(EnvVars initialEnvironment){
             environment=initialEnvironment;
             environment.remove("HUDSON_SERVER_COOKIE");
@@ -285,6 +283,13 @@ public class InTotoWrapper extends SimpleBuildWrapper {
             configSource.setEntryPoint("Jenkinsfile");
 
             super.setConfigSource(configSource);
+        }
+
+        @Override
+        public boolean equals(Object o){
+            if(this==o) return true;
+            if(!(o instanceof BuildInvocation)) return false;
+            return super.equals(o) && getEnvironments() == ((BuildInvocation)o).getEnvironments();
         }
     }
 
@@ -493,8 +498,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
         @Override
         public String invoke(File f, VirtualChannel channel) {
-            // Gson gson = new Gson();
-            // Provenance provenance = gson.fromJson(this.ProvenanceData, Provenance.class);
 
             /* if a transport is provided, let the master send the resulting
              * metadata */
