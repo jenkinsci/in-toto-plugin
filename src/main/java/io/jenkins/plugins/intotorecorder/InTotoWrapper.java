@@ -233,10 +233,6 @@ public class InTotoWrapper extends SimpleBuildWrapper {
     }
 
     private void setProvenanceMaterials() {
-
-        // HashMap<String, ArtifactHash> materials =new HashMap<String, ArtifactHash>();
-        // materials=link.getMaterials();
-
         Iterator hmIterator = link.getMaterials().entrySet().iterator();
         List<Material> provenanceMaterials = new ArrayList<Material>();
 
@@ -497,8 +493,8 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
         @Override
         public String invoke(File f, VirtualChannel channel) {
-            Gson gson = new Gson();
-            Provenance provenance = gson.fromJson(this.ProvenanceData, Provenance.class);
+            // Gson gson = new Gson();
+            // Provenance provenance = gson.fromJson(this.ProvenanceData, Provenance.class);
 
             /* if a transport is provided, let the master send the resulting
              * metadata */
