@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -255,7 +256,7 @@ public class InTotoWrapper extends SimpleBuildWrapper {
         this.provenance.setBuilder(builder);
     }
 
-    private class BuildInvocation extends Invocation{
+    private static class BuildInvocation extends Invocation{
         private Map<String,String> environment;
 
         public void setEnvironments(EnvVars initialEnvironment){
@@ -290,6 +291,11 @@ public class InTotoWrapper extends SimpleBuildWrapper {
             if(this==o) return true;
             if(!(o instanceof BuildInvocation)) return false;
             return super.equals(o) && getEnvironments() == ((BuildInvocation)o).getEnvironments();
+        }
+
+        @Override
+        public int hashCode(){
+            return super.hashCode()+Objects.hash(getEnvironments());
         }
     }
 
