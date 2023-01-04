@@ -234,10 +234,10 @@ public class InTotoWrapper extends SimpleBuildWrapper {
 
     private void setProvenanceMaterials() {
 
-        HashMap<String, ArtifactHash> materials =new HashMap<String, ArtifactHash>();
-        materials=link.getMaterials();
+        // HashMap<String, ArtifactHash> materials =new HashMap<String, ArtifactHash>();
+        // materials=link.getMaterials();
 
-        Iterator hmIterator = materials.entrySet().iterator();
+        Iterator hmIterator = link.getMaterials().entrySet().iterator();
         List<Material> provenanceMaterials = new ArrayList<Material>();
 
         while (hmIterator.hasNext()) {
